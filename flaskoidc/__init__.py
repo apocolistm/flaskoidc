@@ -66,7 +66,7 @@ class FlaskOIDC(Flask):
         
         allowed_role = self.config.get('ALLOWED_ROLE')
         if allowed_role:
-            user_roles = g.oidc_id_toke.get('ldapRoles', []) or []
+            user_roles = g.oidc_id_token.get('ldapRoles', []) or []
             if allowed_role not in user_roles:
                 abort(403, 'Sorry, but you don\'t have permissions for this project. Please contact with your admin.')
         # If accepting token in the request headers
