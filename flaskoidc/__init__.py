@@ -3,7 +3,7 @@ from base64 import b64encode
 from six.moves.urllib.parse import urlencode
 
 import httplib2
-from flask import redirect, Flask, request, g, current_app
+from flask import redirect, Flask, request, g, current_app, abort
 from flask.helpers import get_env, get_debug_flag
 from flask_oidc import OpenIDConnect, _json_loads
 from flask_session import Session
@@ -63,7 +63,12 @@ class FlaskOIDC(Flask):
         if request.path.strip("/") in BaseConfig.WHITELISTED_ENDPOINTS.split(",") or \
                 request.endpoint in BaseConfig.WHITELISTED_ENDPOINTS.split(","):
             return
-
+        
+        allowed_role = self.config.get('ALLOWED_ROLE')
+        if allowed_role:
+            user_roles = g.oidc_id_toke.get('ldapRoles', []) or []
+            if allowed_role not in user_roles:
+                abort(403, 'Sorry, but you don\'t have permissions for this project. Please contact with your admin.')
         # If accepting token in the request headers
         token = None
         if 'Authorization' in request.headers and request.headers['Authorization'].startswith('Bearer '):
